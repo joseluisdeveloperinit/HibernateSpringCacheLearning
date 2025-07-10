@@ -1,13 +1,9 @@
 package com.example.HibernateSpringCache.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(name = "users")
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region="myEntityCache")
-
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +15,6 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
 
-    // Getters and Setters
     public Integer getId() {
         return id;
     }

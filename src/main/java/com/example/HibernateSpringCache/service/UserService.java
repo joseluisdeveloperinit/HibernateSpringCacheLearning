@@ -18,21 +18,19 @@ public class UserService {
     private UserRepository userRepository;
 
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll()  // Usa el método de JPA
+        return userRepository.findAll()
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Método para convertir User -> UserDTO
     private UserDTO convertToDTO(User user) {
         if (user == null) return null;
         return new UserDTO(user.getId(), user.getName(), user.getEmail());
     }
 
-    @Cacheable(value = "users", unless = "#result == null")
+    @Cacheable("users")
     public Optional<UserDTO> getUserById(int id) {
-        // Consulta primero la L2 de Hibernate, luego la BD si es necesario
         return userRepository.findById(id).map(this::convertToDTO);
     }
 }
