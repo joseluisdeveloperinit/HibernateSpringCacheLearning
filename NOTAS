@@ -134,3 +134,96 @@ Tipo de Caché	Alcance	Configuración	Uso típico
 Hibernate L1	Sesión actual	Automática (sin anotaciones)	Evitar consultas repetidas en la misma transacción.
 Hibernate L2	Toda la aplicación	@Cache en entidades	Compartir datos frecuentes entre usuarios.
 Spring @Cacheable	Método o endpoint	@Cacheable + provider (EhCache)	Cachear resultados de servicios o APIs.
+
+
+¿Cuándo deberías personalizar la caché (CacheConfig)?
+Personalizar la caché es necesario en estos casos:
+
+🗃️ Usar un sistema de caché externo (Redis, Ehcache, Caffeine, etc.):
+
+Por defecto, Spring usa un ConcurrentMap en memoria (no recomendado para producción).
+
+Si necesitas:
+
+Caché distribuida (varias instancias de tu app compartiendo caché).
+
+Persistencia (que la caché sobreviva a reinicios).
+
+Mayor rendimiento (Redis es más rápido para grandes volúmenes).
+
+⏱️ Definir tiempo de vida (TTL) para los datos en caché:
+
+Ejemplo: Quieres que los usuarios se refresquen cada 5 minutos.
+
+Sin configuración, los datos quedan en caché hasta que la app se reinicie.
+
+📏 Limitar el tamaño de la caché:
+
+Para evitar que crezca demasiado y consuma toda la memoria.
+
+🔄 Personalizar estrategias de evicción (LRU, LFU, etc.):
+
+Decidir qué datos se eliminan cuando la caché está llena.
+
+🔒 Cachear solo bajo ciertas condiciones:
+
+Ejemplo: Cachear solo si el usuario tiene un rol específico.
+
+¿Qué pasa si NO personalizas la caché?
+Si usas solo @Cacheable sin CacheConfig, Spring Boot aplica lo siguiente:
+
+🗂️ CacheManager predeterminado: ConcurrentMapCacheManager (almacena datos en memoria RAM).
+
+⚡ Funcionamiento básico:
+
+La caché funciona dentro de la misma instancia de la aplicación.
+
+Si reinicias la app, se pierden todos los datos cacheados.
+
+No hay límite de tamaño ni TTL automático.
+
+🔄 Escenarios problemáticos:
+
+Si tu app crece y usa mucha memoria, podrías tener OutOfMemoryError.
+
+Si despliegas múltiples instancias (en Kubernetes, por ejemplo), cada una tendrá su propia caché (inconsistencia).
+
+Ejemplo: ¿Cuándo SÍ necesitarías CacheConfig?
+Supongamos que:
+
+Tu app tiene 100,000 usuarios y no quieres saturar la RAM.
+
+Quieres que los datos cacheados duren solo 1 hora.
+
+Desplegarás la app en 3 servidores y necesitas que compartan caché.
+
+Solución: Configurar Redis en CacheConfig:
+
+java
+@Configuration
+@EnableCaching
+public class CacheConfig {
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory factory) {
+        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
+            .entryTtl(Duration.ofHours(1))  // TTL = 1 hora
+            .disableCachingNullValues();
+
+        return RedisCacheManager.builder(factory)
+            .cacheDefaults(config)
+            .build();
+    }
+}
+Conclusión
+Escenario	¿Necesitas CacheConfig?	Alternativa
+App pequeña, pruebas locales	❌ No	Spring Boot lo maneja automáticamente.
+App en producción con alta carga	✅ Sí	Usa Redis/Ehcache + TTL.
+Múltiples instancias (cloud)	✅ Sí	Caché distribuida (Redis).
+Necesitas límites de memoria	✅ Sí	Configura tamaño máximo (ej. Caffeine).
+Recomendación final:
+
+Si es un proyecto pequeño, puedes omitir CacheConfig y usar la caché básica.
+
+Si es para producción, configura un CacheManager con Redis o Ehcache para evitar problemas de escalabilidad.
+
+

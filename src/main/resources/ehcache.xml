@@ -1,0 +1,9 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://www.ehcache.org/ehcache.xsd">
+    <cache alias="default">
+        <expiry>
+            <ttl unit="minutes">30</ttl> <!-- Tiempo de vida -->
+        </expiry>
+        <heap unit="entries">1000</heap> <!-- Límite de entradas -->
+    </cache>
+</config>
