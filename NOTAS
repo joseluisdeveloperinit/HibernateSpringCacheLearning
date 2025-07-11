@@ -227,3 +227,27 @@ Si es un proyecto pequeño, puedes omitir CacheConfig y usar la caché básica.
 Si es para producción, configura un CacheManager con Redis o Ehcache para evitar problemas de escalabilidad.
 
 
+AÑADIDO AL PROPERTIES PARA MANTENER CREDENCIALES OCULTAS EN WINDOWS + O -
+
+spring.datasource.url=${DB_URL}
+spring.datasource.username=${DB_USER}
+spring.datasource.password=${DB_PASSWORD}
+
+
+POM PARA QUE FUNCIONE
+
+<dependency>
+    <groupId>io.github.cdimascio</groupId>
+    <artifactId>dotenv-java</artifactId>
+    <version>3.0.0</version>
+</dependency>
+
+Opción 1: Definir variables temporales en PowerShell (Rápido)
+Abre PowerShell como administrador.
+
+Ejecuta estos comandos antes de iniciar tu aplicación:
+
+powershell
+$env:DB_URL = "jdbc:mariadb://localhost:3306/hibernate_db"
+$env:DB_USER = "root"
+$env:DB_PASSWORD = "pepepepe"
