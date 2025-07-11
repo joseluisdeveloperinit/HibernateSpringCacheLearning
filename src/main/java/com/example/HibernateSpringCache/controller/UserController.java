@@ -26,7 +26,6 @@ public class UserController {
 
 
     @GetMapping("/{id}")
-    @Cacheable("userResponses")  // Cachea la respuesta JSON completa
     public ResponseEntity<UserDTO> getUserById(@PathVariable int id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)

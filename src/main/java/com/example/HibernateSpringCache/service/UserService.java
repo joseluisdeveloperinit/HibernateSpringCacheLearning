@@ -4,6 +4,7 @@ import com.example.HibernateSpringCache.dto.UserDTO;
 import com.example.HibernateSpringCache.model.User;
 import com.example.HibernateSpringCache.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +33,12 @@ public class UserService {
     @Cacheable("users")
     public Optional<UserDTO> getUserById(int id) {
         return userRepository.findById(id).map(this::convertToDTO);
+    }
+
+
+
+    @CacheEvict(value = "users", key = "#id")
+    public void evictUserCache(int id) {
+        // Método vacío, la anotación hace el trabajo
     }
 }
